@@ -2,6 +2,8 @@
 
 A 2D animation of moving metaballs, implemented with Go and the Fyne toolkit, based on the marching square algorithm.
 
+![Preview](preview.png)
+
 ## References
 
 * [Metaballs and Marching Squares](https://jamie-wong.com/2014/08/19/metaballs-and-marching-squares/), by Jamie Wong
