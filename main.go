@@ -12,7 +12,7 @@ import (
 func main() {
 	a := app.New()
 	w := a.NewWindow("Metaballs")
-	model := newRandomEnsemble(10)
+	model := newRandomEnsemble(8)
 	view := newMetaballsView(model, color.NRGBA{R: 200, G: 200, B: 0, A: 255})
 	content := container.NewWithoutLayout()
 	content.Resize(fyne.NewSize(500, 500))
