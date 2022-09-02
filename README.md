@@ -2,7 +2,7 @@
 
 A 2D animation of moving metaballs, implemented with Go and the Fyne toolkit, based on the marching square algorithm.
 
-![Preview](preview.png)
+![Preview](Preview.png)
 
 ## References
 
