@@ -26,19 +26,14 @@ func newMetaballsView(m *ensemble, fg color.Color) *metaballsView {
 func (v *metaballsView) draw(container *fyne.Container) {
 	size := container.Size()
 	g := grid(size.Width, size.Height)
-	dx := 1 / size.Width
-	dy := 1 / size.Height
-
-	for row := float32(0); row < size.Height; row += g {
-		y := row * dy
-		for col := float32(0); col < size.Width; col += g {
-			x := col * dx
-
+	gx, gy := g/size.Width, g/size.Height
+	for row, y := float32(0), float32(0); row < size.Height; row += g {
+		for col, x := float32(0), float32(0); col < size.Width; col += g {
 			m := v.model
 			a := m.value(x, y)
-			b := m.value(x+dx*g, y)
-			c := m.value(x+dx*g, y+dy*g)
-			d := m.value(x, y+dy*g)
+			b := m.value(x+gx, y)
+			c := m.value(x+gx, y+gy)
+			d := m.value(x, y+gy)
 
 			a1, a2 := lerp(col, col+g, (iso-a)/(b-a)), row
 			b1, b2 := col+g, lerp(row, row+g, (iso-b)/(c-b))
@@ -69,7 +64,9 @@ func (v *metaballsView) draw(container *fyne.Container) {
 			case 11:
 				line(container, v.fg, a1, a2, b1, b2)
 			}
+			x += gx
 		}
+		y += gy
 	}
 }
 
