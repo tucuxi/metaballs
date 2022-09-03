@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	a := app.New()
+	a := app.NewWithID("com.github.tucuxi.metaballs")
 	w := a.NewWindow("Metaballs")
 	model := newRandomEnsemble(8)
 	view := newMetaballsView(model, color.NRGBA{R: 200, G: 200, B: 0, A: 255})
