@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	"math/rand"
+	"sync"
+)
 
 type ball struct {
 	x  float32
@@ -12,6 +15,7 @@ type ball struct {
 
 type ensemble struct {
 	balls []ball
+	mutex sync.RWMutex
 }
 
 func newRandomBall() ball {
@@ -44,6 +48,9 @@ func (b *ball) move() {
 }
 
 func (e *ensemble) value(x, y float32) float32 {
+	rl := e.mutex.RLocker()
+	rl.Lock()
+	defer rl.Unlock()
 	var res float32
 	for _, b := range e.balls {
 		dx := x - b.x
@@ -62,6 +69,8 @@ func newRandomEnsemble(n int) *ensemble {
 }
 
 func (e *ensemble) move() {
+	e.mutex.Lock()
+	defer e.mutex.Unlock()
 	for i := range e.balls {
 		e.balls[i].move()
 	}
