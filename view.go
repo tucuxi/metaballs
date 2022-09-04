@@ -1,35 +1,46 @@
 package main
 
 import (
+	"image"
 	"image/color"
 	"math"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
+	"github.com/StephaneBunel/bresenham"
 )
 
 const iso = 1
 
-type metaballsView struct {
-	fg    color.Color
-	model *ensemble
+type metaballsRenderer struct {
+	raster  *canvas.Raster
+	objects []fyne.CanvasObject
+	fgcolor color.Color
+	bgcolor color.Color
+	widget  *metaballsWidget
 }
 
-func newMetaballsView(m *ensemble, fg color.Color) *metaballsView {
-	v := &metaballsView{
-		fg:    fg,
-		model: m,
-	}
-	return v
+func (r *metaballsRenderer) ApplyTheme() {
+	r.fgcolor = theme.ForegroundColor()
+	r.bgcolor = theme.BackgroundColor()
 }
 
-func (v *metaballsView) draw(container *fyne.Container) {
-	size := container.Size()
-	g := grid(size.Width, size.Height)
-	gx, gy := g/size.Width, g/size.Height
-	for row, y := float32(0), float32(0); row < size.Height; row += g {
-		for col, x := float32(0), float32(0); col < size.Width; col += g {
-			m := v.model
+func (r *metaballsRenderer) Destroy() {
+}
+
+func (r *metaballsRenderer) draw(w, h int) image.Image {
+	g := grid(w, h)
+	gx := float32(g) / float32(w)
+	gy := float32(g) / float32(h)
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	for row := 0; row < h; row += g {
+		y := float32(row) / float32(h)
+		for col := 0; col < w; col += g {
+			x := float32(col) / float32(w)
+			m := r.widget.model
 			a := m.value(x, y)
 			b := m.value(x+gx, y)
 			c := m.value(x+gx, y+gy)
@@ -42,43 +53,81 @@ func (v *metaballsView) draw(container *fyne.Container) {
 
 			switch state(a, b, c, d) {
 			case 1, 14:
-				line(container, v.fg, c1, c2, d1, d2)
+				bresenham.DrawLine(img, c1, c2, d1, d2, r.fgcolor)
 			case 2, 13:
-				line(container, v.fg, b1, b2, c1, c2)
+				bresenham.DrawLine(img, b1, b2, c1, c2, r.fgcolor)
 			case 3, 12:
-				line(container, v.fg, b1, b2, d1, d2)
+				bresenham.DrawLine(img, b1, b2, d1, d2, r.fgcolor)
 			case 4:
-				line(container, v.fg, a1, a2, b1, b2)
+				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
 			case 5:
-				line(container, v.fg, a1, a2, d1, d2)
-				line(container, v.fg, b1, b2, c1, c2)
+				bresenham.DrawLine(img, a1, a2, d1, d2, r.fgcolor)
+				bresenham.DrawLine(img, b1, b2, c1, c2, r.fgcolor)
 			case 6:
-				line(container, v.fg, a1, a2, c1, c2)
+				bresenham.DrawLine(img, a1, a2, c1, c2, r.fgcolor)
 			case 7, 8:
-				line(container, v.fg, a1, a2, d1, d2)
+				bresenham.DrawLine(img, a1, a2, d1, d2, r.fgcolor)
 			case 9:
-				line(container, v.fg, a1, a2, c1, c2)
+				bresenham.DrawLine(img, a1, a2, c1, c2, r.fgcolor)
 			case 10:
-				line(container, v.fg, a1, a2, b1, b2)
-				line(container, v.fg, c1, c2, d1, d2)
+				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
+				bresenham.DrawLine(img, c1, c2, d1, d2, r.fgcolor)
 			case 11:
-				line(container, v.fg, a1, a2, b1, b2)
+				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
 			}
-			x += gx
 		}
-		y += gy
 	}
+	return img
 }
 
-func line(container *fyne.Container, color color.Color, x1, y1, x2, y2 float32) {
-	l := canvas.NewLine(color)
-	l.Position1 = fyne.NewPos(x1, y1)
-	l.Position2 = fyne.NewPos(x2, y2)
-	container.Add(l)
+func (r *metaballsRenderer) Layout(size fyne.Size) {
+	r.raster.Resize(size)
 }
 
-func grid(w, h float32) float32 {
-	return float32(math.Ceil(math.Sqrt(float64(w*h) / 10000)))
+func (r *metaballsRenderer) MinSize() fyne.Size {
+	return fyne.NewSize(float32(64), float32(64))
+}
+
+func (r *metaballsRenderer) Objects() []fyne.CanvasObject {
+	return r.objects
+}
+
+func (r *metaballsRenderer) Refresh() {
+	canvas.Refresh(r.raster)
+}
+
+type metaballsWidget struct {
+	widget.BaseWidget
+
+	model *ensemble
+}
+
+func newMetaballsWidget(m *ensemble) *metaballsWidget {
+	w := &metaballsWidget{model: m}
+	w.ExtendBaseWidget(w)
+	return w
+}
+
+func (w *metaballsWidget) animate() {
+	go func() {
+		for range time.Tick(time.Millisecond * 50) {
+			w.model.move()
+			w.Refresh()
+		}
+	}()
+}
+
+func (w *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
+	renderer := &metaballsRenderer{widget: w}
+	raster := canvas.NewRaster(renderer.draw)
+	renderer.raster = raster
+	renderer.objects = []fyne.CanvasObject{raster}
+	renderer.ApplyTheme()
+	return renderer
+}
+
+func grid(w, h int) int {
+	return int(math.Ceil(math.Sqrt(float64(w*h) / 16384)))
 }
 
 func state(tl, tr, br, bl float32) int {
@@ -98,12 +147,12 @@ func state(tl, tr, br, bl float32) int {
 	return res
 }
 
-func lerp(a, b, t float32) float32 {
+func lerp(a, b int, t float32) int {
 	if t < 0 {
 		return a
 	}
 	if t > 1 {
 		return b
 	}
-	return float32(math.Round(float64(a + (b-a)*t)))
+	return int(math.Round(float64(a) + float64(b-a)*float64(t)))
 }
