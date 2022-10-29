@@ -85,7 +85,7 @@ func (r *metaballsRenderer) Layout(size fyne.Size) {
 }
 
 func (r *metaballsRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(float32(64), float32(64))
+	return fyne.NewSize(64, 64)
 }
 
 func (r *metaballsRenderer) Objects() []fyne.CanvasObject {
@@ -119,9 +119,8 @@ func (w *metaballsWidget) animate() {
 
 func (w *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
 	renderer := &metaballsRenderer{widget: w}
-	raster := canvas.NewRaster(renderer.draw)
-	renderer.raster = raster
-	renderer.objects = []fyne.CanvasObject{raster}
+	renderer.raster = canvas.NewRaster(renderer.draw)
+	renderer.objects = []fyne.CanvasObject{renderer.raster}
 	renderer.ApplyTheme()
 	return renderer
 }
