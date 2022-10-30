@@ -30,19 +30,13 @@ func newRandomBall() ball {
 
 func (b *ball) move() {
 	b.x += b.vx
-	if b.x < b.r {
-		b.x = b.r
-		b.vx = -b.vx
-	} else if b.x > 1-b.r {
-		b.x = 1 - b.r
+	if b.x <= b.r || b.x >= 1-b.r {
+		b.x -= b.vx
 		b.vx = -b.vx
 	}
 	b.y += b.vy
-	if b.y < b.r {
-		b.y = b.r
-		b.vy = -b.vy
-	} else if b.y > 1-b.r {
-		b.y = 1 - b.r
+	if b.y <= b.r || b.y >= 1-b.r {
+		b.y -= b.vy
 		b.vy = -b.vy
 	}
 }

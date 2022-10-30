@@ -2,7 +2,6 @@ package main
 
 import (
 	"image"
-	"image/color"
 	"math"
 	"time"
 
@@ -15,23 +14,35 @@ import (
 
 const iso = 1
 
-type metaballsRenderer struct {
-	raster  *canvas.Raster
-	objects []fyne.CanvasObject
-	fgcolor color.Color
-	bgcolor color.Color
-	widget  *metaballsWidget
+type metaballsWidget struct {
+	widget.BaseWidget
+
+	model  *ensemble
+	raster *canvas.Raster
 }
 
-func (r *metaballsRenderer) ApplyTheme() {
-	r.fgcolor = theme.ForegroundColor()
-	r.bgcolor = theme.BackgroundColor()
+func newMetaballsWidget(m *ensemble) *metaballsWidget {
+	mw := &metaballsWidget{model: m}
+	mw.raster = canvas.NewRaster(mw.draw)
+	mw.ExtendBaseWidget(mw)
+	return mw
 }
 
-func (r *metaballsRenderer) Destroy() {
+func (mw *metaballsWidget) animate() {
+	go func() {
+		for range time.Tick(time.Millisecond * 50) {
+			mw.model.move()
+			mw.Refresh()
+		}
+	}()
 }
 
-func (r *metaballsRenderer) draw(w, h int) image.Image {
+func (mw *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
+	return widget.NewSimpleRenderer(mw.raster)
+}
+
+func (mw *metaballsWidget) draw(w, h int) image.Image {
+	fgcolor := theme.ForegroundColor()
 	g := grid(w, h)
 	gx := float32(g) / float32(w)
 	gy := float32(g) / float32(h)
@@ -40,7 +51,7 @@ func (r *metaballsRenderer) draw(w, h int) image.Image {
 		y := float32(row) / float32(h)
 		for col := 0; col < w; col += g {
 			x := float32(col) / float32(w)
-			m := r.widget.model
+			m := mw.model
 			a := m.value(x, y)
 			b := m.value(x+gx, y)
 			c := m.value(x+gx, y+gy)
@@ -53,76 +64,31 @@ func (r *metaballsRenderer) draw(w, h int) image.Image {
 
 			switch state(a, b, c, d) {
 			case 1, 14:
-				bresenham.DrawLine(img, c1, c2, d1, d2, r.fgcolor)
+				bresenham.DrawLine(img, c1, c2, d1, d2, fgcolor)
 			case 2, 13:
-				bresenham.DrawLine(img, b1, b2, c1, c2, r.fgcolor)
+				bresenham.DrawLine(img, b1, b2, c1, c2, fgcolor)
 			case 3, 12:
-				bresenham.DrawLine(img, b1, b2, d1, d2, r.fgcolor)
+				bresenham.DrawLine(img, b1, b2, d1, d2, fgcolor)
 			case 4:
-				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, b1, b2, fgcolor)
 			case 5:
-				bresenham.DrawLine(img, a1, a2, d1, d2, r.fgcolor)
-				bresenham.DrawLine(img, b1, b2, c1, c2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, d1, d2, fgcolor)
+				bresenham.DrawLine(img, b1, b2, c1, c2, fgcolor)
 			case 6:
-				bresenham.DrawLine(img, a1, a2, c1, c2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, c1, c2, fgcolor)
 			case 7, 8:
-				bresenham.DrawLine(img, a1, a2, d1, d2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, d1, d2, fgcolor)
 			case 9:
-				bresenham.DrawLine(img, a1, a2, c1, c2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, c1, c2, fgcolor)
 			case 10:
-				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
-				bresenham.DrawLine(img, c1, c2, d1, d2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, b1, b2, fgcolor)
+				bresenham.DrawLine(img, c1, c2, d1, d2, fgcolor)
 			case 11:
-				bresenham.DrawLine(img, a1, a2, b1, b2, r.fgcolor)
+				bresenham.DrawLine(img, a1, a2, b1, b2, fgcolor)
 			}
 		}
 	}
 	return img
-}
-
-func (r *metaballsRenderer) Layout(size fyne.Size) {
-	r.raster.Resize(size)
-}
-
-func (r *metaballsRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(64, 64)
-}
-
-func (r *metaballsRenderer) Objects() []fyne.CanvasObject {
-	return r.objects
-}
-
-func (r *metaballsRenderer) Refresh() {
-	canvas.Refresh(r.raster)
-}
-
-type metaballsWidget struct {
-	widget.BaseWidget
-
-	model *ensemble
-}
-
-func newMetaballsWidget(m *ensemble) *metaballsWidget {
-	w := &metaballsWidget{model: m}
-	w.ExtendBaseWidget(w)
-	return w
-}
-
-func (w *metaballsWidget) animate() {
-	go func() {
-		for range time.Tick(time.Millisecond * 50) {
-			w.model.move()
-			w.Refresh()
-		}
-	}()
-}
-
-func (w *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
-	renderer := &metaballsRenderer{widget: w}
-	renderer.raster = canvas.NewRaster(renderer.draw)
-	renderer.objects = []fyne.CanvasObject{renderer.raster}
-	renderer.ApplyTheme()
-	return renderer
 }
 
 func grid(w, h int) int {
