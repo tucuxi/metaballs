@@ -2,11 +2,13 @@ module github.com/tucuxi/metaballs
 
 go 1.19
 
-require fyne.io/fyne/v2 v2.2.3
+require (
+	fyne.io/fyne/v2 v2.2.3
+	github.com/StephaneBunel/bresenham v0.0.0-20211027152503-ec76d7b8e923
+)
 
 require (
 	fyne.io/systray v1.10.1-0.20220621085403-9a2652634e93 // indirect
-	github.com/StephaneBunel/bresenham v0.0.0-20211027152503-ec76d7b8e923
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fredbi/uri v0.0.0-20221012073901-fb871453c6d3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
