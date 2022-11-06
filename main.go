@@ -6,7 +6,7 @@ import (
 )
 
 func main() {
-	a := app.NewWithID("com.github.tucuxi.metaballs")
+	a := app.New()
 	w := a.NewWindow("Metaballs")
 	model := newRandomEnsemble(8)
 	widget := newMetaballsWidget(model)

@@ -1,0 +1,8 @@
+Website = "https://github.com/tucuxi/metaballs"
+
+[Details]
+Icon = "Icon.png"
+Name = "Metaballs"
+ID = "com.github.tucuxi.metaballs"
+Version = "1.2.0"
+Build = 1
