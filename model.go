@@ -55,9 +55,9 @@ func (e *ensemble) value(x, y float32) float32 {
 }
 
 func newRandomEnsemble(n int) *ensemble {
-	balls := make([]ball, 0, n)
+	balls := make([]ball, n)
 	for i := 0; i < n; i++ {
-		balls = append(balls, newRandomBall())
+		balls[i] = newRandomBall()
 	}
 	return &ensemble{balls: balls}
 }

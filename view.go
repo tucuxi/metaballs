@@ -30,7 +30,7 @@ func newMetaballsWidget(m *ensemble) *metaballsWidget {
 
 func (mw *metaballsWidget) animate() {
 	go func() {
-		for range time.Tick(time.Millisecond * 50) {
+		for range time.Tick(time.Millisecond * 40) {
 			mw.model.move()
 			mw.Refresh()
 		}
@@ -51,11 +51,10 @@ func (mw *metaballsWidget) draw(w, h int) image.Image {
 		y := float32(row) / float32(h)
 		for col := 0; col < w; col += g {
 			x := float32(col) / float32(w)
-			m := mw.model
-			a := m.value(x, y)
-			b := m.value(x+gx, y)
-			c := m.value(x+gx, y+gy)
-			d := m.value(x, y+gy)
+			a := mw.model.value(x, y)
+			b := mw.model.value(x+gx, y)
+			c := mw.model.value(x+gx, y+gy)
+			d := mw.model.value(x, y+gy)
 
 			a1, a2 := lerp(col, col+g, (iso-a)/(b-a)), row
 			b1, b2 := col+g, lerp(row, row+g, (iso-b)/(c-b))
