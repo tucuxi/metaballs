@@ -43,18 +43,19 @@ func (mw *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
 
 func (mw *metaballsWidget) draw(w, h int) image.Image {
 	fgcolor := theme.ForegroundColor()
-	g := grid(w, h)
-	gx := float32(g) / float32(w)
-	gy := float32(g) / float32(h)
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	size := float32(max(w, h))
+	g := int(math.Ceil(float64(size) / 128))
 	for row := 0; row < h; row += g {
-		y := float32(row) / float32(h)
+		y := float32(row) / size
+		y2 := float32(row+g) / size
 		for col := 0; col < w; col += g {
-			x := float32(col) / float32(w)
+			x := float32(col) / size
+			x2 := float32(col+g) / size
 			a := mw.model.value(x, y)
-			b := mw.model.value(x+gx, y)
-			c := mw.model.value(x+gx, y+gy)
-			d := mw.model.value(x, y+gy)
+			b := mw.model.value(x2, y)
+			c := mw.model.value(x2, y2)
+			d := mw.model.value(x, y2)
 
 			a1, a2 := lerp(col, col+g, (iso-a)/(b-a)), row
 			b1, b2 := col+g, lerp(row, row+g, (iso-b)/(c-b))
@@ -90,10 +91,6 @@ func (mw *metaballsWidget) draw(w, h int) image.Image {
 	return img
 }
 
-func grid(w, h int) int {
-	return int(math.Ceil(math.Sqrt(float64(w*h) / 16384)))
-}
-
 func state(tl, tr, br, bl float32) int {
 	res := 0
 	if tl >= iso {
@@ -119,4 +116,11 @@ func lerp(a, b int, t float32) int {
 		return b
 	}
 	return int(math.Round(float64(a) + float64(b-a)*float64(t)))
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }
