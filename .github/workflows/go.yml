@@ -1,9 +1,11 @@
 name: Go
 on:
   push:
-    branches: ["main"]
+    branches:
+      - main
   pull_request:
-    branches: ["main"]
+    branches:
+      - main
 
 jobs:
   build:
@@ -19,21 +21,11 @@ jobs:
       - name: Get dependencies
         run: |
           sudo apt-get update && sudo apt-get install gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
-          go install golang.org/x/tools/cmd/goimports@latest
-          go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
-          go install honnef.co/go/tools/cmd/staticcheck@latest
 
-      - name: Vet
-        run: go vet ./...
-
-      - name: Goimports
-        run: test -z $(goimports -e -d . | tee /dev/stderr)
-
-      - name: Gocyclo
-        run: gocyclo -over 20 .
-
-      - name: Staticcheck
-        run: staticcheck ./...
+      - name: Lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.54
 
       - name: Build
         run: go build -v ./...
