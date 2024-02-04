@@ -117,10 +117,3 @@ func lerp(a, b int, t float32) int {
 	}
 	return int(math.Round(float64(a) + float64(b-a)*float64(t)))
 }
-
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
