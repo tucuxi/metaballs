@@ -16,7 +16,7 @@ Then you can interact with the TUI using the keyboard to set your preferences:
 
 After setting your preferences, press `q` to confirm and start the animation.
 
-![Animation](docs/img/animation.png)
+![Animation](docs/img/metaball.gif)
 
 ## References
 
