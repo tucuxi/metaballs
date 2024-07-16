@@ -42,7 +42,7 @@ func (mw *metaballsWidget) CreateRenderer() fyne.WidgetRenderer {
 }
 
 func (mw *metaballsWidget) draw(w, h int) image.Image {
-	fgcolor := theme.ForegroundColor()
+	fgcolor := theme.Color(theme.ColorNameForeground)
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	size := float32(max(w, h))
 	g := int(math.Ceil(float64(size) / 128))
