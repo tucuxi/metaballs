@@ -1,7 +1,8 @@
 module github.com/tucuxi/metaballs
 
-go 1.22
-toolchain go1.23.7
+go 1.23.0
+
+toolchain go1.24.1
 
 require (
 	fyne.io/fyne/v2 v2.5.4
