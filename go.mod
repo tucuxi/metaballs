@@ -5,7 +5,7 @@ go 1.23.0
 toolchain go1.24.1
 
 require (
-	fyne.io/fyne/v2 v2.5.4
+	fyne.io/fyne/v2 v2.5.5
 	github.com/StephaneBunel/bresenham v0.0.0-20211027152503-ec76d7b8e923
 )
 
