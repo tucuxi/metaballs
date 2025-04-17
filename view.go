@@ -32,7 +32,7 @@ func (mw *metaballsWidget) animate() {
 	go func() {
 		for range time.Tick(time.Millisecond * 40) {
 			mw.model.move()
-			fyne.DoAndWait(mw.Refresh)
+			fyne.DoAndWait(func() { mw.Refresh() })
 		}
 	}()
 }
