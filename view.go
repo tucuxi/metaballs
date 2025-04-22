@@ -30,9 +30,9 @@ func newMetaballsWidget(m *ensemble) *metaballsWidget {
 
 func (mw *metaballsWidget) animate() {
 	go func() {
-		for range time.Tick(time.Millisecond * 40) {
+		for range time.Tick(time.Millisecond * 20) {
 			mw.model.move()
-			fyne.DoAndWait(func() { mw.Refresh() })
+			fyne.Do(func() { mw.Refresh() })
 		}
 	}()
 }
