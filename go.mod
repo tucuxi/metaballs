@@ -3,7 +3,7 @@ module github.com/tucuxi/metaballs
 go 1.24.2
 
 require (
-	fyne.io/fyne/v2 v2.6.0
+	fyne.io/fyne/v2 v2.6.1
 	github.com/StephaneBunel/bresenham v0.0.0-20211027152503-ec76d7b8e923
 )
 
