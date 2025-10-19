@@ -30,7 +30,7 @@ func newMetaballsWidget(m *ensemble) *metaballsWidget {
 
 func (mw *metaballsWidget) animate() {
 	go func() {
-		for range time.Tick(time.Millisecond * 20) {
+		for range time.Tick(time.Millisecond * 10) {
 			mw.model.move()
 			fyne.Do(func() { mw.Refresh() })
 		}
@@ -46,16 +46,30 @@ func (mw *metaballsWidget) draw(w, h int) image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	size := float32(max(w, h))
 	g := int(math.Ceil(float64(size) / 128))
+
+	cols := w/g + 1 // +1 for the boundary
+	rows := h/g + 1
+	grid := make([][]float32, rows)
+	for i := range grid {
+		grid[i] = make([]float32, cols)
+	}
+
+	for row := 0; row < rows; row++ {
+		y := float32(row*g) / size
+		for col := 0; col < cols; col++ {
+			x := float32(col*g) / size
+			grid[row][col] = mw.model.value(x, y)
+		}
+	}
+
 	for row := 0; row < h; row += g {
-		y := float32(row) / size
-		y2 := float32(row+g) / size
 		for col := 0; col < w; col += g {
-			x := float32(col) / size
-			x2 := float32(col+g) / size
-			a := mw.model.value(x, y)
-			b := mw.model.value(x2, y)
-			c := mw.model.value(x2, y2)
-			d := mw.model.value(x, y2)
+			i, j := row/g, col/g
+
+			a := grid[i][j]
+			b := grid[i][j+1]
+			c := grid[i+1][j+1]
+			d := grid[i+1][j]
 
 			a1, a2 := lerp(col, col+g, (iso-a)/(b-a)), row
 			b1, b2 := col+g, lerp(row, row+g, (iso-b)/(c-b))
