@@ -46,30 +46,38 @@ func (mw *metaballsWidget) draw(w, h int) image.Image {
 	img := image.NewRGBA(image.Rect(0, 0, w, h))
 	size := float32(max(w, h))
 	g := int(math.Ceil(float64(size) / 128))
-
 	cols := w/g + 1 // +1 for the boundary
-	rows := h/g + 1
-	grid := make([][]float32, rows)
-	for i := range grid {
-		grid[i] = make([]float32, cols)
+
+	grid := make([][]float32, 2)
+	grid[0] = make([]float32, cols)
+	grid[1] = make([]float32, cols)
+	rowIndex := 0
+
+	calcValue := func(i, j int) float32 {
+		x := float32(j*g) / size
+		y := float32(i*g) / size
+		return mw.model.value(x, y)
 	}
 
-	for row := 0; row < rows; row++ {
-		y := float32(row*g) / size
-		for col := 0; col < cols; col++ {
-			x := float32(col*g) / size
-			grid[row][col] = mw.model.value(x, y)
-		}
+	for j := range cols {
+		grid[0][j] = calcValue(0, j)
 	}
 
 	for row := 0; row < h; row += g {
-		for col := 0; col < w; col += g {
-			i, j := row/g, col/g
+		i := row / g
+		nextRowIndex := 1 - rowIndex
 
-			a := grid[i][j]
-			b := grid[i][j+1]
-			c := grid[i+1][j+1]
-			d := grid[i+1][j]
+		for j := range cols {
+			grid[nextRowIndex][j] = calcValue(i+1, j)
+		}
+
+		for col := 0; col < w; col += g {
+			j := col / g
+
+			a := grid[rowIndex][j]
+			b := grid[rowIndex][j+1]
+			c := grid[nextRowIndex][j+1]
+			d := grid[nextRowIndex][j]
 
 			a1, a2 := lerp(col, col+g, (iso-a)/(b-a)), row
 			b1, b2 := col+g, lerp(row, row+g, (iso-b)/(c-b))
@@ -101,6 +109,7 @@ func (mw *metaballsWidget) draw(w, h int) image.Image {
 				bresenham.DrawLine(img, a1, a2, b1, b2, fgcolor)
 			}
 		}
+		rowIndex = nextRowIndex
 	}
 	return img
 }
