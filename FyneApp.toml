@@ -4,7 +4,7 @@ Website = "https://github.com/tucuxi/metaballs"
 Icon = "Icon.png"
 Name = "Metaballs"
 ID = "com.github.tucuxi.metaballs"
-Version = "1.2.5"
+Version = "1.2.6"
 Build = 1
 
 [Migrations]
